@@ -1,0 +1,141 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+$web-color:#6E9677;
+$web-font1: 'Nippo', sans-serif;
+$web-font2: 'Tabular', sans-serif;
+
+$extralight:200;
+$light:300;
+$regular:400;
+$medium:500;
+$bold:700;
+
+body{
+    background-color: $web-color;
+    font-family: $web-font1,$web-font2;
+    overflow-x: hidden;
+}
+
+//POSITIONING THE LOGO IMAGE
+.main{
+    // position: relative;
+    height: 100vh;
+    width: 100vw;
+
+    .bg-image-container{
+
+        position: absolute;
+        top: 4%;
+        left: 2%;
+
+        img{
+            width: 2.6rem;
+        }
+    }
+
+
+    .main-section{
+        .main-section-container-parent{
+            .main-section-container{
+                height: 100vh;
+                width: 100vw;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                // border: 2px solid red;
+
+                
+                #form{
+                    // border: 2px solid white;
+                    padding: 2rem;
+                    label{
+
+                        color: white;
+                        font-family: $web-font1,$web-font2;
+                        font-size: $bold;
+                        font-size: 2.5rem;
+                        text-align: center;
+                        opacity: .8;
+                        white-space: nowrap;
+      
+                    }
+
+                    input{
+                        padding: 2.6rem;
+                        width: 100%;
+                        border: none;
+                        background-color: #27482f;
+                        color: white;
+                        font-family: $web-font1,$web-font2;
+                        font-size: 2rem;
+                        font-weight: $regular;
+                        margin-top: 2rem;
+
+                        &:focus{
+                            outline: none;
+                            border: 1px solid white;
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media screen and(max-width:600px) {
+    .main .main-section .main-section-container-parent .main-section-container {
+        #form{
+            label{
+                font-size: 2rem;
+            }
+
+            input{
+                font-size: 1.8rem;
+                width: 20rem;
+                padding: 1.4rem;
+            }
+        }
+    }
+
+}
+
+@media screen and(max-width:427px) {
+
+    .main .main-section .main-section-container-parent .main-section-container {
+        #form{
+            label{
+                font-size: 1.8rem;
+            }
+
+            input{
+                font-size: 1.5rem;
+                width: 18rem;
+                // background-color: blue;
+                padding: 1.3rem;
+            }
+        }
+    }
+
+}
+
+@media screen and(max-width:377px) {
+    .main .main-section .main-section-container-parent .main-section-container {
+        #form{
+            padding: 1.6rem;
+            label{
+                font-size: 1.3rem;
+            }
+            input{
+                // background-color: red;
+                font-size: 1.1rem;
+                width: 14rem;
+            }
+        }
+    }
+
+}

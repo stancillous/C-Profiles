@@ -2,6 +2,7 @@
     
     <HomePageComp  @fetchUser="getUserData"/>
 
+
     <div v-show="noError==='true'" class="userDetailsContainer">
 
         <div id="user-details-wrapper">
@@ -103,10 +104,10 @@
                 userFullname:'',
                 userLoginName:'',
                 userGithubLink:'',
-                
 
-                //REPO LANGUAGES
-                initialRepoLanguages:[],
+                //THE INITIAL VARIABLE HOLDING MY CHART INFO
+                //SET TO NUll
+                languagesChart:null,
       
                 // USER REPOS INFO
                 repoName:[],
@@ -125,7 +126,11 @@
 
         
         methods:{
+            
+            //FUNCTION TO GET USER INFO AND REPO LANGUAGES
             getUserData(argumentFromHomePageComp){
+                let initialLanguagesArray=[]
+
                 this.username = argumentFromHomePageComp
                 //FETCHING THE USER DETAILS AND SETTING THEM TO THE VARIBALES IN DATA ABOVE
              
@@ -197,14 +202,14 @@
                                 for(let language in repoLanguages){
                                     // console.log(language)
 
-                                    if(this.initialRepoLanguages.includes(language)){
+                                    if(initialLanguagesArray.includes(language)){
                                         // console.log('')
                                         continue
                                     }
                                     else{
-                                        if(this.initialRepoLanguages.length<8){
+                                        if(initialLanguagesArray.length<8){
 
-                                            this.initialRepoLanguages.push(language)
+                                            initialLanguagesArray.push(language)
                                             // console.log(this.initialRepoLanguages)
                                         }
                                         
@@ -219,10 +224,11 @@
 
                         //SET TIMEOUT
                         setTimeout(() => {
-                            
-                            // console.log(this.initialRepoLanguages)
 
-                            let languagesArray = this.initialRepoLanguages
+                            let languagesArray = initialLanguagesArray
+                            
+
+                            //CALL THE FUNC TO DRAW THE CHART AND PASS THE LANGUAGES ARRAY AS ARGUMENT
                             this.getChart(languagesArray)
                         }, 2500);
                     })
@@ -242,6 +248,8 @@
 
             },
 
+            //FUNCTION TO RENDER THE CHART
+            //RECEIVES THE ARRAY OF THE USER'S LANGUAGES AS AN ARGUMENT
             getChart(languagesArray){
                
                 //GLOBAL 
@@ -269,7 +277,6 @@
                 // console.log('data',dataOptions)
 
                 //ARRAY THAT WILL HOLD POSSIBLE BGCOLOR OPTIONS
-                // let bgColorOptions = ['orange','yellow','violet','indigo','purple','maroon','pink','red','blue','brown','green']
                 let bgColorOptions = ['#d1cc2a','#68e35b','#d56ceb','#8ba9d9','#c2b280','#e89c51','#8bd9a0','plum','#eedc82']
                 let bgColor=[]
 
@@ -280,11 +287,19 @@
                     }
                 }
 
-                // console.log('bgColor',bgColor)
+               
 
+                //CHECKING TO SEE IF THERE IS AN INSTANCE OF ANY CHART
+                //AND REMOVING IT IF THERE IS ANY BEFORE RENDERING ANOTHER CHART
+                //WITH DIFF DATA
+                if(this.languagesChart!==null){
+                    this.languagesChart.destroy()
+                }
 
-                let myChart = document.querySelector('#chart-canvas')
-                let finalChart = new Chart(myChart,{
+                let chartCanvasElement = document.querySelector('#chart-canvas')
+
+                //
+                this.languagesChart = new Chart(chartCanvasElement,{
                     type:'doughnut',
                     data:{
                         labels:languagesArray,
@@ -347,12 +362,11 @@
                 
                     }
                 })
+            
+                this.languagesChart;
+   
+            },
 
-                finalChart;
-
-
-
-            }
 
         },
 
@@ -557,3 +571,5 @@
 
 
 </style>
+
+<!-- CHECK THE ICONS URL -->

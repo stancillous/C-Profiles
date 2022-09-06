@@ -36,6 +36,7 @@
         font-family: "Satoshi", sans-serif, "General Sans", sans-serif;
         font-weight: bold;
         padding: 1rem 0;
+        opacity: .9;
 
     }
 
@@ -45,7 +46,7 @@
     border-radius: .3rem;
     font-family: "Satoshi", sans-serif, "General Sans", sans-serif;
     font-weight: 800;
-    color: black;
+    color: rgb(24, 22, 22);
     background-color: whitesmoke;
     outline: none;
     border-top-style: hidden;

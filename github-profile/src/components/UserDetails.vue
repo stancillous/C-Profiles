@@ -5,32 +5,44 @@
     <div v-show="noError==='true'" class="userDetailsContainer">
 
         <div id="user-details-wrapper">
-            <section class="user-details-section">
-    
-                <div class="user-avatar">
-                    <!-- <img src="../assets/githubimage.png" id="user-avatar-img" alt="user image"> -->
-                    <img v-show="userAvatar!==''" :src="userAvatar" id="user-avatar-img" alt="user image">
-                </div>
-                <div class="username">
-                    <!-- <h3 id="user-name" >Stancillous raymond</h3> -->
-                    <h3 v-show="userFullname!==''" id="user-name" > {{ userFullname}}</h3>
-                </div>
-                
-                <div class="userlink">
-                    <!-- <a id="user-github-link" href="">@stancillous</a> -->
-                    <a v-show="userGithubLink!==''" id="user-github-link" href="">@{{ userLoginName}}</a>
-                </div>
-                
-                <div class="repos-total">
-                    
-                    <!-- <button id="user-total-repos">23 repos</button> -->
-                    <div class="button-container">
-    
-                        <button v-show="publicRepos!==''" id="user-total-repos">{{ publicRepos}} public repos</button>
+
+            <div class="chart-and-user-details">
+
+
+                <section class="user-details-section">
+        
+                    <div class="user-avatar">
+                        
+                        <!-- ONLY SHOW THE USER IMAGE IF THE USER AVATAR VARIABLE IS NOT AN EMPTY STRING -->
+                        <img v-show="userAvatar!==''" :src="userAvatar" id="user-avatar-img" alt="user image">
                     </div>
+                    <div class="username">
+                        <!-- ONLY SHOW THE USER FULL NAME IF THE USER_FULLNAME VARIABLE IS NOT AN EMPTY STRING -->
+                        <h3 v-show="userFullname!==''" id="user-name" > {{ userFullname}}</h3>
+                    </div>
+                    
+                    <div class="userlink">
+                        <!-- ONLY SHOW THE USER GITHUB LINK IF THE USER_GITHUB_LINK VARIABLE IS NOT AN EMPTY STRING -->
+                        <a v-show="userGithubLink!==''"  target="_blank" id="user-github-link" :href="userGithubLink">@{{ userLoginName}}</a>
+                    </div>
+                    
+                    <div class="repos-total">
+                        
+                        <div class="button-container">
+                            <!-- ONLY SHOW THE USER PUBLIC REPOS IF THE PUBLIC_REPOS VARIABLE IS NOT AN EMPTY STRING -->
     
+                            <button v-show="publicRepos!==''" id="user-total-repos">{{ publicRepos}} public repos</button>
+                        </div>
+        
+                    </div>
+                </section>
+
+                <div class="chart-container">
+                    <canvas id="chart-canvas"></canvas>
                 </div>
-            </section>
+
+            </div>
+
     
             <section class="user-repos-section">
     
@@ -60,20 +72,25 @@
 
     <!-- THE ERRORS TO BE DISPLAUED -->
     <div class="error-div">
+        <!-- MESSAGE TO B DISPLAYED WHEN USER IS NOT FOUND -->
         <h1 v-show="userNotFoundError==='true'"  class="error-message" >USER NOT FOUND :(</h1>
 
+        <!-- MESSAGE TO BE DISPALYED WHEN USER REACHES THEIR RATE LIMIT -->
         <h1 v-show="rateLimitError==='true'" class="rateLimitError">You have reached your <a class="rate-limit-link" href="https://docs.github.com/en/rest/rate-limit" target="_blank">rate limit</a>. Try again later </h1>
     </div>
 
 </template>
 
 <script>
+    import Chart from 'chart.js/auto';  //IMPORTING THE CHART THAT WE INSTALLED WITH NPM 
+
     import HomePageComp from './homePage.vue'
 
     export default {
         name:'UserDetailsComp',
         components:{
             HomePageComp,
+
 
         },
 
@@ -86,6 +103,10 @@
                 userFullname:'',
                 userLoginName:'',
                 userGithubLink:'',
+                
+
+                //REPO LANGUAGES
+                initialRepoLanguages:[],
       
                 // USER REPOS INFO
                 repoName:[],
@@ -113,7 +134,7 @@
 
                     //RESPONSE 200
                     if(res.status===200){
-                        console.log('ok',res.status)
+                        // console.log('ok',res.status)
                         this.noError = 'true'
                         this.userNotFoundError = 'false'
                         this.rateLimitError= 'false'
@@ -138,7 +159,7 @@
                 .then((info) => {
                     this.userFullname = info.name
                     this.userLoginName = info.login
-                    this.userGithubLink = info.url
+                    this.userGithubLink = info.html_url
                     this.publicRepos = info.public_repos
                     this.userAvatar = info.avatar_url
 
@@ -161,20 +182,49 @@
 
                             this.repoUrl = repoItem.html_url
 
-                            //FETCHING LANGUAGES FOR A SPECIFIC REPO
 
+                            //FETCHING LANGUAGES FOR A SPECIFIC REPO
                             fetch(`https://api.github.com/repos/${this.username}/${this.repoName}/languages`)
                             .then((res)=>res.json())
                             .then((repoLanguages)=>{
-
+                                
                                 //EACH TIME WE ITERATE THROUGH THE LANGUAGES, IT RETURNS A SINGLE OBJECT,
                                 //WE THEN ADD THE OBJECT TO THE ARRAY OF OUR REPO LANGUGES
                                 this.repoLang.push(repoLanguages)
-        
+                                
+                                // console.log(repoLanguages)
+
+                                for(let language in repoLanguages){
+                                    // console.log(language)
+
+                                    if(this.initialRepoLanguages.includes(language)){
+                                        // console.log('')
+                                        continue
+                                    }
+                                    else{
+                                        if(this.initialRepoLanguages.length<8){
+
+                                            this.initialRepoLanguages.push(language)
+                                            // console.log(this.initialRepoLanguages)
+                                        }
+                                        
+                                    }
+
+
+                                }
+
                             })
                             
                         })
 
+                        //SET TIMEOUT
+                        setTimeout(() => {
+                            
+                            // console.log(this.initialRepoLanguages)
+
+                            let languagesArray = this.initialRepoLanguages
+                            this.getChart(languagesArray)
+                        }, 2500);
                     })
 
                     .catch((error)=>{
@@ -192,6 +242,118 @@
 
             },
 
+            getChart(languagesArray){
+               
+                //GLOBAL 
+                Chart.defaults.color='black'
+                Chart.defaults.font.size = 16;
+                Chart.defaults.font.weight = 500;
+                Chart.defaults.font.family = 'satoshi';
+
+                Chart.overrides['doughnut'].plugins.legend.align = 'center'
+                Chart.overrides['doughnut'].plugins.legend.position = 'bottom'
+
+               
+                //ARRAY THAT WILL HOLD THE POSSIBLE DATA VALUES FOR THE LABELS
+                let dataOptions = []
+
+                //LOOPING OVER THE LANGUAGES ARRAY AND PUSHING THE VALUE 1  FOR
+                //EVERY REPO LANGUAGE AVAILABLE
+                let index = 0
+
+                while(index<languagesArray.length){
+                    dataOptions.push(1)
+                    index++
+                }
+
+                // console.log('data',dataOptions)
+
+                //ARRAY THAT WILL HOLD POSSIBLE BGCOLOR OPTIONS
+                // let bgColorOptions = ['orange','yellow','violet','indigo','purple','maroon','pink','red','blue','brown','green']
+                let bgColorOptions = ['#d1cc2a','#68e35b','#d56ceb','#8ba9d9','#c2b280','#e89c51','#8bd9a0','plum','#eedc82']
+                let bgColor=[]
+
+                //PUSHING A COLOR FROM THE COLOR OPTIONS ARRAY FOR EACH ITEM IN THE ARRAY
+                for(let key in dataOptions){
+                    if(key<dataOptions.length){
+                        bgColor.push(bgColorOptions[key])
+                    }
+                }
+
+                // console.log('bgColor',bgColor)
+
+
+                let myChart = document.querySelector('#chart-canvas')
+                let finalChart = new Chart(myChart,{
+                    type:'doughnut',
+                    data:{
+                        labels:languagesArray,
+                        datasets:[{
+                            label:'top languages ',
+                            data:dataOptions,
+                            backgroundColor:bgColor,
+                            borderWidth:1,
+                            borderColor:'black',
+                            hoverBorderWidth:2,
+                            hoverBorderColor:'black'
+                        }],
+                
+                    },
+                    options:{
+                        responsive:true,
+                        animations:{
+                            duration:1200
+                        },
+
+                        plugins:{
+                            //THE TITLE
+                            title:{
+                                display:true,
+                                text:'Top Languages',
+                                font:{
+                                    size:20,
+                                    weight:800
+                                }
+                            },
+
+                            //THE LEGEND
+                            legend:{ 
+                                title:{
+
+                                },
+                                
+                                labels:{
+                                    fontcolor:'red',
+                                    boxHeight:15,
+                                    boxWidth:20,
+                                    padding:15,
+
+                                    font:{
+                                        weight:800,
+                                        size:13
+                                    }
+                                }
+                            },
+
+                            layout:{
+                                padding:{
+                                    left:8,
+                                    top:10,
+                    
+                                }
+                            },
+
+                        }
+                
+                    }
+                })
+
+                finalChart;
+
+
+
+            }
+
         },
 
 
@@ -201,6 +363,30 @@
 </script>
 
 <style scoped >
+
+    /* THE DIV CONTAINING THE CHART */
+    .chart-container{
+        /* border: 2px solid; */
+        height: 30rem;
+        width: 40rem;
+     
+    }
+    
+    /* THE DIV CONTAINING THE CHART AND THE USER INFO */
+    .chart-and-user-details{
+        padding: 4rem 0;
+        /* margin-bottom: 6rem; */
+        height: 100%;
+        width: 100%;
+        border-top: 1px solid grey;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        flex-wrap: wrap;
+
+    }
+
+
 
     /* ERROR MESSAGES */
     .error-div{
@@ -222,11 +408,10 @@
         color: red;
     }
 
-    
-    
+
     
       
-    /* THIS COMPONENT'S ROOT DIV */
+    /* THE OUTERMOST DIV*/
     .userDetailsContainer{
         text-align: center;
     }
@@ -238,6 +423,7 @@
         justify-content: center;
     }
 
+    /* DIV THAT WRAPS EVERY CONTENT */
     #user-details-wrapper{
         /* border: 3px solid red; */
         max-width: 110rem;
@@ -245,28 +431,29 @@
         /* text-align: center; */
     }
 
+    /* SECTION SHOWING USER DETAILS LIKE NAME AND IMAGE */
     .user-details-section{
         padding-top: 6rem;
+        /* border: 2px solid; */
+    
 
     }
     /* user's avatar */
     .user-avatar{
-        margin: 0 auto;
-        height: 16rem;
-        width: 16rem;
+        /* margin: 0 auto; */
+        margin-bottom: 1.5rem;
+        height: 24rem;
+        width: 24rem;
         position: relative;
         border-radius: 50%;
     }
-
+    /* USER IMAGE */
     .user-avatar img{
-
-        border: 9px double rgba(0, 0, 0,.5);
-
+        border: 5px double rgba(0, 0, 0,.5);
         position: absolute;
         top: 0;
         left: 0;
         border-radius: inherit;
-
         height: 100%;
         width: 100%;
         object-fit: cover;
@@ -274,6 +461,7 @@
 
     /* user's username */
     .username #user-name{
+
         font-weight: 800;
         font-size: 2.6rem;
         text-transform: capitalize;
@@ -306,7 +494,7 @@
     /* USER REPOS SECTION */
     .user-repos-section{
         padding: 1.5rem;
-        margin-top: 5rem;
+        margin-top: 9rem;
         text-align: left;  
 
     }
@@ -335,6 +523,7 @@
         top: 0;
 
     }
+    /* repo name */
     .user-repos-section .user-repos-wrapper .repo h3{
         padding-top: 2.5rem;
         padding-bottom: 1rem;
@@ -358,6 +547,12 @@
         padding-bottom: .1rem;
 
     }
+
+    /* MEDIA QUERIES */
+
+
+
+
     
 
 

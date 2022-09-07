@@ -1,6 +1,7 @@
 
 
-# C-Profiles
+# C PROFILES
+weather app
 A simple and clean way to have a quick glance at all your github repositories
 
 ![Screenshot (23)](https://user-images.githubusercontent.com/99094257/188591754-5168953d-7299-4a58-9395-46f882d38a1d.png)

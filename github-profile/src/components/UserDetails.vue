@@ -26,16 +26,27 @@
                         <!-- ONLY SHOW THE USER GITHUB LINK IF THE USER_GITHUB_LINK VARIABLE IS NOT AN EMPTY STRING -->
                         <a v-show="userGithubLink!==''"  target="_blank" id="user-github-link" :href="userGithubLink">@{{ userLoginName}}</a>
                     </div>
-                    
-                    <div class="repos-total">
-                        
-                        <div class="button-container">
-                            <!-- ONLY SHOW THE USER PUBLIC REPOS IF THE PUBLIC_REPOS VARIABLE IS NOT AN EMPTY STRING -->
-    
-                            <button v-show="publicRepos!==''" id="user-total-repos">{{ publicRepos}} public repos</button>
-                        </div>
+
+                    <div class="buttons-container">
+
+                        <div class="repos-total">
+                            
+                            <div class="button-container">
+                                <!-- ONLY SHOW THE USER PUBLIC REPOS IF THE PUBLIC_REPOS VARIABLE IS NOT AN EMPTY STRING -->
         
+                                <button v-show="publicRepos!==''" id="user-total-repos">{{ publicRepos}} <span style="display:block" >public repos</span></button>
+                                <!-- <button id="user-total-repos">{{ publicRepos}} <span style="display:block" >public repos</span></button> -->
+                            </div>
+            
+                        </div>
+    
+                        <div class="followers-total">
+                            <div class="f-div">
+                                <button v-show="followers!==''" class="followers">{{followers}} <span style="display:block" >followers</span> </button>
+                            </div>
+                        </div>
                     </div>
+                    
                 </section>
 
                 <div class="chart-container">
@@ -104,6 +115,7 @@
                 userFullname:'',
                 userLoginName:'',
                 userGithubLink:'',
+                followers:'',
 
                 //THE INITIAL VARIABLE HOLDING MY CHART INFO
                 //SET TO NUll
@@ -131,12 +143,12 @@
             getUserData(argumentFromHomePageComp){
                 let initialLanguagesArray=[]
 
+                // username that is entered and passed from the homepage comp
                 this.username = argumentFromHomePageComp
                 //FETCHING THE USER DETAILS AND SETTING THEM TO THE VARIBALES IN DATA ABOVE
              
                 fetch(`https://api.github.com/users/${this.username}`)
                 .then((res) => {
-
                     //RESPONSE 200
                     if(res.status===200){
                         // console.log('ok',res.status)
@@ -162,6 +174,8 @@
                 })
 
                 .then((info) => {
+
+                    this.followers = info.followers
                     this.userFullname = info.name
                     this.userLoginName = info.login
                     this.userGithubLink = info.html_url
@@ -230,7 +244,7 @@
 
                             //CALL THE FUNC TO DRAW THE CHART AND PASS THE LANGUAGES ARRAY AS ARGUMENT
                             this.getChart(languagesArray)
-                        }, 2500);
+                        }, 2000);
                     })
 
                     .catch((error)=>{
@@ -244,9 +258,18 @@
                     console.log(error)
                 })
 
+                // //FETCHING USER FOLLOWERS
+                // fetch(`https://api.github.com/users/${this.username}/followers`)
+                // .then((res)=>res.json())
+                // .then((info)=>{
+                //     console.log(info)
+                // })
 
 
             },
+
+  
+
 
             //FUNCTION TO RENDER THE CHART
             //RECEIVES THE ARRAY OF THE USER'S LANGUAGES AS AN ARGUMENT
@@ -380,6 +403,7 @@
 
     /* THE DIV CONTAINING THE CHART */
     .chart-container{
+        margin-top: 1rem;
         /* border: 2px solid; */
         height: 30rem;
         width: 40rem;
@@ -448,7 +472,11 @@
     /* SECTION SHOWING USER DETAILS LIKE NAME AND IMAGE */
     .user-details-section{
         padding-top: 6rem;
-        /* border: 2px solid; */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 1rem;
     
 
     }
@@ -489,21 +517,52 @@
         text-decoration: none;
         opacity: .9;
         font-size: 1.6rem;
-
+    }
+    /* anchor link */
+    .userlink #user-github-link:hover{
+        text-decoration: underline;
 
     }
 
-    /* button */
-    .repos-total #user-total-repos{
-        background-color: black;
-        color: white;
+    .buttons-container{
+        /* border: 1px solid; */
+        margin-top: 1rem;
+        display: flex;
+        align-items: center;
+
+        
+    }
+
+    /* div with the buttons */
+    .buttons-container div{
+        margin: 0 .4rem;
+
+        
+    }
+
+    /* buttons */
+    .buttons-container button{
+        /* background-color: black; */
+        /* border: none; */
+        background-color: transparent;
+        border: 1px solid black;
+        color: rgb(0, 0, 0);
         font-weight: 900;
         margin-top: 1.4rem;
         font-size: 1.3rem;
-        padding: 1.4rem 3rem;
-        border: none;
+        padding: 1.2rem 2.4rem;
+        /* margin: .3rem; */
         border-radius: .2rem;
+
+        
     }
+
+
+
+
+
+
+
 
     /* USER REPOS SECTION */
     .user-repos-section{
